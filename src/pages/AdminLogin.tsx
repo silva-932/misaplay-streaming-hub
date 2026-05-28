@@ -6,14 +6,19 @@ const AdminLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminLogin(username, password)) {
+    setError("");
+    setLoading(true);
+    const res = await adminLogin(username, password);
+    setLoading(false);
+    if (res.ok) {
       navigate("/admin/dashboard");
     } else {
-      setError("Credenciais inválidas");
+      setError(res.error || "Credenciais inválidas");
     }
   };
 
@@ -28,6 +33,7 @@ const AdminLogin = () => {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
             className="w-full px-4 py-3 rounded-lg bg-muted text-foreground border border-border focus:border-primary outline-none"
+            autoComplete="username"
           />
           <input
             type="password"
@@ -35,9 +41,12 @@ const AdminLogin = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="w-full px-4 py-3 rounded-lg bg-muted text-foreground border border-border focus:border-primary outline-none"
+            autoComplete="current-password"
           />
           {error && <p className="text-destructive text-sm">{error}</p>}
-          <button type="submit" className="gradient-btn w-full py-3 rounded-lg">Entrar</button>
+          <button type="submit" disabled={loading} className="gradient-btn w-full py-3 rounded-lg disabled:opacity-50">
+            {loading ? "A entrar..." : "Entrar"}
+          </button>
         </form>
       </div>
     </div>

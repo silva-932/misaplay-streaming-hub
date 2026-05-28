@@ -418,10 +418,11 @@ const AdminDashboard = () => {
               )}
               <button
                 onClick={save}
-                className={`gradient-btn px-5 py-2 rounded-lg flex items-center gap-2 text-sm ${hasChanges ? "shadow-lg" : "opacity-70"}`}
+                disabled={saving}
+                className={`gradient-btn px-5 py-2 rounded-lg flex items-center gap-2 text-sm ${hasChanges ? "shadow-lg" : "opacity-70"} disabled:opacity-50`}
               >
                 <Save size={14} />
-                Salvar
+                {saving ? "A salvar..." : "Salvar"}
               </button>
             </div>
           </div>

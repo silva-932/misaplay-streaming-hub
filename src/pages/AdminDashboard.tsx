@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSiteData, saveSiteData, isAdminLoggedIn, adminLogout, type SiteData } from "@/lib/siteData";
+import { fetchSiteData, saveSiteData, isAdminLoggedIn, adminLogout, defaultData, type SiteData } from "@/lib/siteData";
 import { toast } from "sonner";
 import {
   LogOut, Save, LayoutDashboard, Image, Link2, CreditCard, Building2,
@@ -22,23 +22,41 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState<SiteData>(getSiteData());
+  const [data, setData] = useState<SiteData>(defaultData);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAdminLoggedIn()) navigate("/admin");
+    (async () => {
+      const ok = await isAdminLoggedIn();
+      if (!ok) {
+        navigate("/admin");
+        return;
+      }
+      const d = await fetchSiteData();
+      setData(d);
+      setLoading(false);
+    })();
   }, [navigate]);
 
-  const save = () => {
-    saveSiteData(data);
-    setHasChanges(false);
-    toast.success("Alterações salvas com sucesso!");
+  const save = async () => {
+    setSaving(true);
+    try {
+      await saveSiteData(data);
+      setHasChanges(false);
+      toast.success("Alterações salvas na base de dados!");
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao salvar");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const logout = () => {
-    adminLogout();
+  const logout = async () => {
+    await adminLogout();
     navigate("/admin");
   };
 
